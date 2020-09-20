@@ -4,4 +4,4 @@
 
 bot_token = "919142306:AAF8FGRQ9SOrquBUFdq6i0463vdM8LwI2Q8"
 bot_user_name = "fizz_cloudia_bot"
-URL = "THE-HEROKU-APP-LINK"
+URL = "https://fizzcloudiaapp.herokuapp.com/"
