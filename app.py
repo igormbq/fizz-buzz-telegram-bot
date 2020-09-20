@@ -40,6 +40,7 @@ def set_webhook():
 
 @app.route('/')
 def index():
+    set_webhook()
     return '.'
 
 
