@@ -41,7 +41,7 @@ def set_webhook():
 @app.route('/')
 def index():
     set_webhook()
-    return '.'
+    return 'TESANDO .'
 
 
 if __name__ == '__main__':
