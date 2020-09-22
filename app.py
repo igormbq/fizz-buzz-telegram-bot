@@ -1,35 +1,32 @@
 from flask import Flask, request
+from resources.credentials import bot_token, URL
+from resources.db import insert_data
+from resources.fizbuzz import validate_data, fizzbuzz
 import telegram
-from telebot.credentials import bot_token, bot_user_name,URL
-from telebot.mastermind import get_response
 
+app = Flask(__name__)
 
-global bot
 global TOKEN
+global bot
 TOKEN = bot_token
 bot = telegram.Bot(token=TOKEN)
 
-app = Flask(__name__)
 
 @app.route('/{}'.format(TOKEN), methods=['POST'])
 def respond():
     # retrieve the message in JSON and then transform it to Telegram object
     update = telegram.Update.de_json(request.get_json(force=True), bot)
-
     chat_id = update.message.chat.id
     msg_id = update.message.message_id
 
     # Telegram understands UTF-8, so encode text for unicode compatibility
     text = update.message.text.encode('utf-8').decode()
-    print("got text message :", text)
+    response = validate_data(text)
 
-    # response = get_response(text)
-    # response += " / UPDATE TEXT =" + text
-    response = " / UPDATE type = {}".format(type(update.message.text))
+    insert_data(response, msg_id, update)
     bot.sendMessage(chat_id=chat_id, text=response, reply_to_message_id=msg_id)
 
     return 'ok'
-
 
 @app.route('/set_webhook', methods=['GET', 'POST'])
 def set_webhook():
@@ -43,8 +40,18 @@ def set_webhook():
 @app.route('/')
 def index():
     set_webhook()
-    return 'TESANDO .'
-
+    return "It's working"
 
 if __name__ == '__main__':
     app.run(threaded=True)
+
+
+# DB FINISH
+#
+# @app.message_handler(commands=['start'])
+# def start():
+#     update = telegram.Update.de_json(request.get_json(force=True), bot)
+#     chat_id = update.message.chat.id
+#     msg_id = update.message.message_id
+#
+#     bot.sendMessage(chat_id=chat_id, text='Hello, welcome to test FizzBuzz!', reply_to_message_id=msg_id)
