@@ -1,7 +1,7 @@
 from flask import Flask, request
 from resources.credentials import bot_token, URL
-# from resources.db import insert_data
-from resources.fizbuzz import validate_data, fizzbuzz
+from resources.db import insert_data
+from resources.fizzbuzz import validate_data
 import telegram
 
 app = Flask(__name__)
@@ -22,7 +22,7 @@ def respond():
     # Telegram understands UTF-8, so encode text for unicode compatibility
     text = update.message.text.encode('utf-8').decode()
     response = validate_data(text)
-    # insert_data(response, msg_id, update)
+    insert_data(response, msg_id, update)
     bot.sendMessage(chat_id=chat_id, text=response, reply_to_message_id=msg_id)
 
     return 'ok'
