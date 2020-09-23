@@ -2,29 +2,52 @@ import os
 import telegram
 from flask import Flask, request
 from resources.credentials import bot_token, URL
-from resources.db import insert_data
+from resources.db import db, insert_data
 from resources.utils import validate_data
+from flask_sqlalchemy import SQLAlchemy
 
-app = Flask(__name__)
 
 global TOKEN
 global bot
 TOKEN = bot_token
 bot = telegram.Bot(token=TOKEN)
 
+app = Flask(__name__)
+
+SQLALCHEMY_DATABASE_URI = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}".format(
+    username="igormbq",
+    password="bancodedados",
+    hostname="igormbq.mysql.pythonanywhere-services.com",
+    databasename="igormbq$fizzbuzzdb",
+)
+app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
+app.config["SQLALCHEMY_POOL_RECYCLE"] = 299
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+db = SQLAlchemy(app)
+
 
 @app.route('/{}'.format(TOKEN), methods=['POST'])
 def respond():
-    # retrieve the message in JSON and then transform it to Telegram object
+    # Retrieve the message in JSON and then transform it to Telegram object
     update = telegram.Update.de_json(request.get_json(force=True), bot)
+
+   # Extract data from message
     chat_id = update.message.chat.id
     msg_id = update.message.message_id
 
     # Telegram understands UTF-8, so encode text for unicode compatibility
     text = update.message.text.encode('utf-8').decode()
-    # response = validate_data(text)
-    # insert_data(response, msg_id, update)
-    bot.sendMessage(chat_id=chat_id, text=text, reply_to_message_id=msg_id)
+
+    # Execute fizzbuzz logical
+    response = validate_data(text)
+
+    # Insert of message and response into DB
+    insert_data(text, update)
+    insert_data(response, update)
+
+    # Sends the reply message to the user
+    bot.sendMessage(chat_id=chat_id, text=response, reply_to_message_id=msg_id)
 
     return 'ok'
 
@@ -45,7 +68,8 @@ def index():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    # app.run(host='0.0.0.0', port=port)
+    app.run(debug=True)
 
 # DB FINISH
 #

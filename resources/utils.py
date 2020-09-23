@@ -8,7 +8,7 @@ def validate_data(msg):
     :param msg: Entry typed by the chatbot user.
     """
     if (len(msg) <= 280) and (msg.isdecimal()):
-        fizz_buzz(int(msg))
+        return fizz_buzz(int(msg))
     else:
         return "Your entry must be an integer number and not more than 280 characters"
 
@@ -32,5 +32,3 @@ def fizz_buzz(number):
     else:
         return number
 
-def testin():
-    return print("XWEERECAAA")

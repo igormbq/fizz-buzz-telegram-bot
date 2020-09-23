@@ -1,20 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-app = Flask(__name__)
-
-SQLALCHEMY_DATABASE_URI = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}".format(
-    username="igormbq",
-    password="bancodedados",
-    hostname="igormbq.mysql.pythonanywhere-services.com",
-    databasename="igormbq$fizzbuzzdb",
-)
-app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
-app.config["SQLALCHEMY_POOL_RECYCLE"] = 299
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-db = SQLAlchemy(app)
-
+db = SQLAlchemy()
 
 class User(db.Model):
     __tablename__ = "user"
@@ -34,12 +21,21 @@ class Message(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
 
-def insert_data(text, msg_id, update):
-    # existUser = User.query.filter_by(telegram_id=update.message.chat.id)
-    message = Message(text=text, chat_id=msg_id)
-    user = User(first_name=update.message.chat.first_name, telegram_id=update.message.chat.id)
+def insert_data(text, update):
+    """
+    This function verify if theuser has been
+    """
+    existUser = User.query.filter_by(telegram_id=update.message.chat.id).first()
 
-    user.messages.append(message)
-    db.session.add(user)
+    if existUser:
+        message = Message(text=text, chat_id=msg_id,user_id=existUser.id)
+
+
+    else:
+        user = User(first_name=update.message.chat.first_name, telegram_id=update.message.chat.id)
+        db.session.add(user)
+        message = Message(text=text, user_id=user.id)
+        user.messages.append(message)
+
     db.session.add(message)
     db.session.commit()
