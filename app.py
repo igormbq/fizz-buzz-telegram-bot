@@ -5,6 +5,7 @@ from fizzbot.resources.utils import validate_data
 import telegram
 
 app = Flask(__name__)
+server = app.server
 
 global TOKEN
 global bot
