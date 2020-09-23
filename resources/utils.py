@@ -31,3 +31,6 @@ def fizz_buzz(number):
         return "{} is buzz".format(number)
     else:
         return number
+
+def testin():
+    return print("XWEERECAAA")
