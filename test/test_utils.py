@@ -16,6 +16,7 @@ def test_if_is_buzz():
     result = fizz_buzz(5)
     assert result == "5 is buzz"
 
+
 def test_if_is_not_a_fizzbuzz():
     result = fizz_buzz(4)
     assert result == 4

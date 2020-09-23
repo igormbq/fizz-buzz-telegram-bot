@@ -1,7 +1,7 @@
 from flask import Flask, request
-from resources.credentials import bot_token, URL
-from resources.db import insert_data
-from resources.utils import validate_data
+from fizzbot.resources.credentials import bot_token, URL
+from fizzbot.resources.db import insert_data
+from fizzbot.resources.utils import validate_data
 import telegram
 
 app = Flask(__name__)
