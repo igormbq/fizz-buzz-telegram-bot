@@ -1,8 +1,9 @@
+import os
+import telegram
 from flask import Flask, request
 from resources.credentials import bot_token, URL
 from resources.db import insert_data
 from resources.utils import validate_data
-import telegram
 
 app = Flask(__name__)
 
@@ -41,9 +42,10 @@ def index():
     set_webhook()
     return "It's working"
 
-if __name__ == '__main__':
-    app.run(threaded=True)
 
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
 
 # DB FINISH
 #
