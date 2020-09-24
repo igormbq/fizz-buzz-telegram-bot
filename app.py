@@ -1,10 +1,9 @@
-import os
-import telegram
 from flask import Flask, request
 from resources.credentials import bot_token, URL
-from resources.db import db, insert_data
-from resources.utils import validate_data
+from resources.db import insert_data, DATABASE_URI
+from resources.utils import fizz_buzz
 from flask_sqlalchemy import SQLAlchemy
+import telegram
 
 
 global TOKEN
@@ -14,25 +13,18 @@ bot = telegram.Bot(token=TOKEN)
 
 app = Flask(__name__)
 
-SQLALCHEMY_DATABASE_URI = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}".format(
-    username="igormbq",
-    password="bancodedados",
-    hostname="igormbq.mysql.pythonanywhere-services.com",
-    databasename="igormbq$fizzbuzzdb",
-)
-app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
+app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
 app.config["SQLALCHEMY_POOL_RECYCLE"] = 299
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
-
 
 @app.route('/{}'.format(TOKEN), methods=['POST'])
 def respond():
     # Retrieve the message in JSON and then transform it to Telegram object
     update = telegram.Update.de_json(request.get_json(force=True), bot)
 
-   # Extract data from message
+    #Extract data from message
     chat_id = update.message.chat.id
     msg_id = update.message.message_id
 
@@ -40,16 +32,17 @@ def respond():
     text = update.message.text.encode('utf-8').decode()
 
     # Execute fizzbuzz logical
-    response = validate_data(text)
+    response = fizz_buzz(text)
 
-    # Insert of message and response into DB
-    insert_data(text, update)
-    insert_data(response, update)
+    # Insert message and response into DB
+    insert_data(text, update, is_reply = 0)
+    insert_data(response, update, is_reply = 1)
 
     # Sends the reply message to the user
     bot.sendMessage(chat_id=chat_id, text=response, reply_to_message_id=msg_id)
 
     return 'ok'
+
 
 @app.route('/set_webhook', methods=['GET', 'POST'])
 def set_webhook():
@@ -67,16 +60,4 @@ def index():
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    # app.run(host='0.0.0.0', port=port)
     app.run(debug=True)
-
-# DB FINISH
-#
-# @app.message_handler(commands=['start'])
-# def start():
-#     update = telegram.Update.de_json(request.get_json(force=True), bot)
-#     chat_id = update.message.chat.id
-#     msg_id = update.message.message_id
-#
-#     bot.sendMessage(chat_id=chat_id, text='Hello, welcome to test FizzBuzz!', reply_to_message_id=msg_id)
